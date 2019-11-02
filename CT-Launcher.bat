@@ -72,7 +72,7 @@ echo Are you using ZeroTier?
 echo Yes [Y] No [N] Y
 echo ZeroTier is not running...
 echo Try Again? Yes [Y] No [N] N
-echo Proceed without ZeroTier? If not, program will close.
+echo Proceed without ZeroTier? If not, launcher will close.
 choice /C YN /n /M "Yes [Y] No [N]"
 if ERRORLEVEL 2 goto Close
 if ERRORLEVEL 1 goto Start
