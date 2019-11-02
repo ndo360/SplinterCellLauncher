@@ -24,7 +24,7 @@ echo Welcome to the launcher.
 echo Before we can launch, have you ran the game with 3DAnalyzer before?
 choice /C YN /n /M "Yes [Y] No [N]"
 if ERRORLEVEL 2 goto INFO
-if ERRORLEVEL 1 goto START
+if ERRORLEVEL 1 goto VPNCHECK
 
 :INFO
 echo You must have ran the game at least once through 3DAnalzyer.
@@ -34,61 +34,44 @@ echo Press any button to close.
 pause >NUL
 exit
 
+:VPNCHECK
+echo Are you using ZeroTier, or Other?
+choice /c 12 /n /M "ZeroTier [1], Other [2]"
+if ERRORLEVEL 2 goto START
+if ERRORLEVEL 1 goto BEGIN
 
-:START
+:BEGIN
 tasklist /fi "imagename eq %exe%" 2>NUL |find /I /N "%exe%">NUL
 If not ERRORLEVEL 1 (
   GOTO BESURE
 ) ELSE (
-  echo Are you using ZeroTier?
-  choice /C YN /n /M "Yes [Y] No [N]"
-  if ERRORLEVEL 2 goto START
-  if ERRORLEVEL 1 goto CHECKING
+  echo Starting ZeroTier...
+  start "" "C:\Program Files (x86)\ZeroTier\One\ZeroTier One.exe"
+  Timeout /T 3 /Nobreak >NUL
+  GOTO BEGIN
 )
-
-:CHECKING
-cls
-echo Welcome to the launcher.
-echo Before we can launch, have you ran the game with 3DAnalyzer before?
-echo Yes [Y] No [N] Y
-echo Are you using ZeroTier?
-echo Yes [Y] No [N] Y
-tasklist /fi "imagename eq %exe%" 2>NUL |find /I /N "%exe%">NUL
-If not ERRORLEVEL 1 (
-  GOTO BESURE
-) ELSE (
-  echo ZeroTier is not running...
-  choice /C YN /n /M "Try Again? Yes [Y] No [N]"
-  if ERRORLEVEL 2 goto CANCEL
-  if ERRORLEVEL 1 goto CHECKING
-)
-
-:CANCEL
-cls
-echo Welcome to the launcher.
-echo Before we can launch, have you ran the game with 3DAnalyzer before?
-echo Yes [Y] No [N] Y
-echo Are you using ZeroTier?
-echo Yes [Y] No [N] Y
-echo ZeroTier is not running...
-echo Try Again? Yes [Y] No [N] N
-echo Proceed without ZeroTier? If not, launcher will close.
-choice /C YN /n /M "Yes [Y] No [N]"
-if ERRORLEVEL 2 goto Close
-if ERRORLEVEL 1 goto Start
-)
-
-:CLOSE
-exit
 
 :BESURE
-echo Make sure that you are connected to the network. The ID is below.
-echo 0cccb752f756b32b
-echo.
-echo Press any key once connected.
-pause >NUL
+echo Are you joining the unify network, or a private one?
+choice /C 12 /n /M "Unify [1] Private [2]"
+if ERRORLEVEL 1 goto unify
+if ERRORLEVEL 2 goto private
 
-:Ensuring Connection
+:unify
+echo Connecting to the Unify Network...
+set network=0cccb752f756b32b
+start "" "C:\ProgramData\ZeroTier\One\zerotier-one_x64.exe" -q join %network% >NUL
+goto Ensuring-Connection
+
+:private
+echo Please enter the private network's ID...
+set /p network="Network ID: "
+echo Connecting to the private network...
+start "" "C:\ProgramData\ZeroTier\One\zerotier-one_x64.exe" -q join %network% >NUL
+goto Ensuring-Connection
+
+
+:Ensuring-Connection
 echo Please wait as the launcher verifies the adapter's creation...
 :Ensuring-Loop
 FOR /F "tokens=3,*" %%A IN ('netsh interface show interface^|find "Connected"') DO echo %%B | findstr "ZeroTier" > Nul
@@ -126,6 +109,7 @@ REM The above sets the metric of the adapter.
 
 REM PART 3: Game Status
 ECHO Game has launched, monitoring now.
+Timeout /T 5 /Nobreak >NUL
 REM This will monitor the game's activity. If it stops running, then everything is closed.
 :LOOP
 tasklist | find /i "SCCT_Versus" >nul 2>&1
@@ -138,5 +122,7 @@ IF ERRORLEVEL 1 (
 REM This checks and sees if CT is operating. Slight loop delay added.
 
 :QUIT
-taskkill /F /IM 3DAnalyze.exe
+taskkill /F /IM 3DAnalyze.exe >NUL
+start "" "C:\ProgramData\ZeroTier\One\zerotier-one_x64.exe" -q leave %network% >NUL
+taskkill /F /IM "ZeroTier One.exe" >NUL
 exit
