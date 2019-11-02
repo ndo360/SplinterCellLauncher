@@ -15,7 +15,7 @@ REM Command above is to get the current location.
 	exit
 REM Must be ran as admin.
 
-REM Part 0: Must have ZeroTier running. Must Be Connected.
+REM Part 0: Are you using ZeroTier?
 
 :ORIGIN
 set "exe=ZeroTier One.exe"
