@@ -4,14 +4,11 @@ pushd %~dp0
 REM Command above is to get the current location.
 
 :check_Permissions
-    echo Administrative permissions required. Detecting permissions...
-
     net session >nul 2>&1
     if %errorLevel% == 0 (
-        echo Success: Administrative permissions confirmed.
 		goto ORIGIN
     ) else (
-        echo Failure: Current permissions inadequate.
+        echo Insufficient Permissions: You must run this program as administrator.
     )
 
     pause >nul
@@ -32,7 +29,7 @@ if ERRORLEVEL 1 goto START
 :INFO
 echo You must have ran the game at least once through 3DAnalzyer.
 echo This is to ensure that you have the flashlight fix applied.
-echo Once you have ran the game at least once, you may use this launcher.
+echo Once you have ran the game at least once, using 3DAnalyzer, you may use this launcher.
 echo Press any button to close.
 pause >NUL
 exit
@@ -43,28 +40,45 @@ tasklist /fi "imagename eq %exe%" 2>NUL |find /I /N "%exe%">NUL
 If not ERRORLEVEL 1 (
   GOTO BESURE
 ) ELSE (
-  echo You Must have Zero Tier running.
-  choice /C YN /n /M "Try Again? Yes [Y] No [N]"
-  if ERRORLEVEL 2 goto CANCEL
-  if ERRORLEVEL 1 goto RETRY
+  echo Are you using ZeroTier?
+  choice /C YN /n /M "Yes [Y] No [N]"
+  if ERRORLEVEL 2 goto START
+  if ERRORLEVEL 1 goto CHECKING
 )
 
-:RETRY
+:CHECKING
 cls
 echo Welcome to the launcher.
 echo Before we can launch, have you ran the game with 3DAnalyzer before?
+echo Yes [Y] No [N] Y
+echo Are you using ZeroTier?
 echo Yes [Y] No [N] Y
 tasklist /fi "imagename eq %exe%" 2>NUL |find /I /N "%exe%">NUL
 If not ERRORLEVEL 1 (
   GOTO BESURE
 ) ELSE (
-  echo Zero Tier still not found.
+  echo ZeroTier is not running...
   choice /C YN /n /M "Try Again? Yes [Y] No [N]"
   if ERRORLEVEL 2 goto CANCEL
-  if ERRORLEVEL 1 goto RETRY
+  if ERRORLEVEL 1 goto CHECKING
 )
 
 :CANCEL
+cls
+echo Welcome to the launcher.
+echo Before we can launch, have you ran the game with 3DAnalyzer before?
+echo Yes [Y] No [N] Y
+echo Are you using ZeroTier?
+echo Yes [Y] No [N] Y
+echo ZeroTier is not running...
+echo Try Again? Yes [Y] No [N] N
+echo Proceed without ZeroTier? If not, program will close.
+choice /C YN /n /M "Yes [Y] No [N]"
+if ERRORLEVEL 2 goto Close
+if ERRORLEVEL 1 goto Start
+)
+
+:CLOSE
 exit
 
 :BESURE
