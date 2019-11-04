@@ -85,13 +85,13 @@ If not ERRORLEVEL 1 (
 
 :START
 REM PART 1: Launching Framer and the Game.
-start "" "..\Framer.exe"
+start "" "Framer.exe"
 REM Launches Framer for optional FPS change.
 echo Enter your desired FPS.
 echo Click here and press any key to proceed.
 pause >NUL
 REM This allows for users to enter their own FPS before proceeding.
-start "" "..\3DAnalyzer\3DAnalyze.exe" /EXE=%~dp0\System\SCCT_Versus.exe
+start "" "3DAnalyzer\3DAnalyze.exe" /EXE=%~dp0\System\SCCT_Versus.exe
 REM The above launches the 3D Analyzer Program & Game
 
 REM Part 2: Setting the Network Adapter
