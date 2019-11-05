@@ -87,7 +87,6 @@ If ERRORLEVEL 0 (
 
 
 :BESURE
-set /p zeroprocess=<zerotier-one_x64.txt
 echo Are you joining the unify network, or a private one?
 choice /C 12 /n /M "Unify [1] Private [2]"
 if ERRORLEVEL 2 goto private
