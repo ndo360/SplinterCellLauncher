@@ -6,7 +6,7 @@ REM Command above is to get the current location.
 :check_Permissions
     net session >nul 2>&1
     if %errorLevel% == 0 (
-		goto ORIGIN
+		goto setup
     ) else (
         echo Insufficient Permissions: You must run this program as administrator.
     )
@@ -16,10 +16,42 @@ REM Command above is to get the current location.
 REM Must be ran as admin.
 
 REM Part 0: Are you using ZeroTier?
+:setup
+cls
+type logo.txt
+echo.
+:Grabbing
+if not exist SCCT_Versus.txt (
+	set files=SCCT_Versus
+	call chooser.bat
+)
+if not exist 3DAnalyze.txt (
+	set files=3DAnalyze
+	call chooser.bat
+)
+if not exist Framer.txt (
+	set files=Framer
+	call chooser.bat
+)
+
+if exist "SCCT_Versus.txt" (
+    if exist "3DAnalyze.txt" (
+		if exist "Framer.txt" (
+			goto :ORIGIN
+    ) else goto :REQUIRED
+) else goto :REQUIRED
+)
+else goto :REQUIRED
+
+:REQUIRED
+echo The Program Requires All Files.
+echo Try Again, Quit?
+choice /C 12 /n /M "Try Again [1] Quit [2]"
+if ERRORLEVEL 2 exit
+if ERRORLEVEL 1 goto setup
+
 
 :ORIGIN
-set "exe=ZeroTier One.exe"
-
 echo Welcome to the launcher.
 echo Before we can launch, have you ran the game with 3DAnalyzer before?
 choice /C YN /n /M "Yes [Y] No [N]"
@@ -40,22 +72,26 @@ choice /c 12 /n /M "ZeroTier [1], Other [2]"
 if ERRORLEVEL 2 goto START
 if ERRORLEVEL 1 goto BEGIN
 
+
 :BEGIN
-tasklist /fi "imagename eq %exe%" 2>NUL |find /I /N "%exe%">NUL
-If not ERRORLEVEL 1 (
+sc start ZeroTierOneService>NUL
+If ERRORLEVEL 0 (
   GOTO BESURE
 ) ELSE (
-  echo Starting ZeroTier...
-  start "" "C:\Program Files (x86)\ZeroTier\One\ZeroTier One.exe"
-  Timeout /T 3 /Nobreak >NUL
-  GOTO BEGIN
+  echo ZeroTier Process Could Not Be Started...
+  echo Make sure program is installed / reinstall the program.
+  choice /c 12 /n /M "Launch Anyway? Yes[1], No[2]"
+  if ERRORLEVEL 2 exit
+  if ERRORLEVEL 1 goto START
 )
 
+
 :BESURE
+set /p zeroprocess=<zerotier-one_x64.txt
 echo Are you joining the unify network, or a private one?
 choice /C 12 /n /M "Unify [1] Private [2]"
-if ERRORLEVEL 1 goto unify
 if ERRORLEVEL 2 goto private
+if ERRORLEVEL 1 goto unify
 
 :unify
 echo Connecting to the Unify Network...
@@ -84,14 +120,18 @@ If not ERRORLEVEL 1 (
 
 
 :START
+set /p thegame=<SCCT_Versus.txt
+set /p ThreeDAnalyzer=<3DAnalyze.txt
+set /p FramerApp=<Framer.txt
+
 REM PART 1: Launching Framer and the Game.
-start "" "Framer.exe"
+start "" "%FramerApp%"
 REM Launches Framer for optional FPS change.
 echo Enter your desired FPS.
 echo Click here and press any key to proceed.
 pause >NUL
 REM This allows for users to enter their own FPS before proceeding.
-start "" "3DAnalyzer\3DAnalyze.exe" /EXE=%~dp0\System\SCCT_Versus.exe
+start "" "%ThreeDAnalyzer%" /EXE=%thegame%
 REM The above launches the 3D Analyzer Program & Game
 
 REM Part 2: Setting the Network Adapter
@@ -124,5 +164,4 @@ REM This checks and sees if CT is operating. Slight loop delay added.
 :QUIT
 taskkill /F /IM 3DAnalyze.exe >NUL
 start "" "C:\ProgramData\ZeroTier\One\zerotier-one_x64.exe" -q leave %network% >NUL
-taskkill /F /IM "ZeroTier One.exe" >NUL
 exit
