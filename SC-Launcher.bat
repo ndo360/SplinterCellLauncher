@@ -52,9 +52,9 @@ if exist "%~dp0Sources" (
 set "nospace=%~dp0Sources\Launcher\local.txt"
 if not exist %nospace% (
 echo %~dp0Sources>"%nospace%"
-set /p local=<"%nospace%"
 
 )
+set /p local=<"%nospace%"
 goto :SelectNow
 
 :SelectNow
