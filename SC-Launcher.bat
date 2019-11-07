@@ -1,7 +1,7 @@
 ::[Bat To Exe Converter]
 ::
 ::YAwzoRdxOk+EWAjk
-::fBw5plQjdCuDJGmW+0UiKRYUag2OOXj6Tq1EvqHH3P6Co0AhR/Y6eYLayqSdHOMc50jre6oexnZTlt8JHhhdch7rTQc1pn0CgmyAONWFjyzVB2SI80UzE2Bmu1DfmTk4ZcBUk8AM3W249UH60awT3hg=
+::fBw5plQjdCuDJGmW+0UiKRYUag2OOXj6Tq1EvqHH3P6Co0AhR/Y6eYLayqSdHOMc50jre6oexnZTlt8JHhhdch7rTQc1pn0CgmyAONWFjyzVB2SI80UzE2Bmu1DfmTk4ZcBUtsIW3SO2+V/DlqYf3zX5V6ULW2rizsw=
 ::YAwzuBVtJxjWCl3EqQJgSA==
 ::ZR4luwNxJguZRRnk
 ::Yhs/ulQjdF+5
@@ -14,8 +14,8 @@
 ::dAsiuh18IRvcCxnZtBJQ
 ::cRYluBh/LU+EWAnk
 ::YxY4rhs+aU+IeA==
-::cxY6rQJ7JhzQF1fEqQJgZko0
-::ZQ05rAF9IBncCkqN+0xwdVsEAlXi
+::cxY6rQJ7JhzQF1fEqQJgZkk0
+::ZQ05rAF9IBncCkqN+0xwdVsEAlbi
 ::ZQ05rAF9IAHYFVzEqQIDOBddQhCHLiuZA7kQqMT6+uSEqkgPNA==
 ::eg0/rx1wNQPfEVWB+kM9LVsJDDehcUe7E7sf4O3pjw==
 ::fBEirQZwNQPfEVWB+kM9LVsJDDehcUe7E7sf4O3pjw==
@@ -48,13 +48,18 @@ REM Must be ran as admin.
 :GameSelect
 if exist "%~dp0Sources" (
 	cd /d "%~dp0Sources"
-) else goto :error
+)
+set "nospace=%~dp0Sources\Launcher\local.txt"
+if not exist %nospace% (
+echo %~dp0Sources>"%nospace%"
+set /p local=<"%nospace%"
 
-if not exist local.txt echo %~dp0Sources>local.txt
+)
 goto :SelectNow
 
 :SelectNow
-type logo.txt
+set "splashone=%local%\Launcher\logo.txt"
+type "%splashone%"
 echo.
 echo Standard Launch, Quickstart, Close Launcher?
 choice /C 123 /n /M "Regular [1], Quickstart [2] Close Launcher [3]"
@@ -75,6 +80,11 @@ if ERRORLEVEL 2 goto DAQ
 if ERRORLEVEL 1 goto CTQ
 
 :CT
+cls
+set "splashtwo=%local%\Launcher\logo2.txt"
+type "%splashtwo%"
+echo.
+cd /d "%local%\ChaosTheory"
 choice /C 12 /n /M "SvM [1] Coop [2]"
 if ERRORLEVEL 2 (
 call CT-Launcher-Source-C.bat
@@ -86,10 +96,20 @@ exit
 )
 
 :DA
+cls
+set "splashthree=%local%\Launcher\logo3.txt"
+type "%splashthree%"
+echo.
+cd /d "%local%\DoubleAgent"
 call DA-Launcher-Source.bat
 exit
 
 :CTQ
+cls
+set "splashtwo=%local%\Launcher\logo2.txt"
+type "%splashtwo%"
+echo.
+cd /d "%local%\ChaosTheory"
 choice /C 12 /n /M "SvM [1] Coop [2]"
 if ERRORLEVEL 2 (
 call CT-Launcher-Source-C-Q.bat
@@ -101,6 +121,11 @@ exit
 )
 
 :DAQ
+cls
+set "splashthree=%local%\Launcher\logo3.txt"
+type "%splashthree%"
+echo.
+cd /d "%local%\DoubleAgent"
 call DA-Launcher-Source-Q.bat
 exit
 
