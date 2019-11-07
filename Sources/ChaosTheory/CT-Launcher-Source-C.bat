@@ -12,56 +12,83 @@ REM Command above is to get the current location.
     )
 
     pause >nul
-	exit
+exit
 REM Must be ran as admin.
 
 REM Part 0: Are you using ZeroTier?
-
 :Grabbing
-if not exist SCCT_Versus.txt (
-	set files=SCCT_Versus
-	call chooser.bat
-)
-if not exist 3DAnalyze.txt (
-	set files=3DAnalyze
-	call chooser.bat
-)
-if not exist Framer.txt (
-	set files=Framer
+if not exist splintercell3.txt (
+	set files=splintercell3
 	call chooser.bat
 )
 
-if exist "SCCT_Versus.txt" (
-    if exist "3DAnalyze.txt" (
-		if exist "Framer.txt" (
-			goto :ORIGIN
-    ) else goto :REQUIRED
-) else goto :REQUIRED
+if not exist coopdir.txt (
+echo Choose folder containing the game...
+set folderloc=coopdir
+call chooserf.bat
+goto :checking
 )
-else goto :REQUIRED
+:checking
+if not exist splintercell3.txt goto :REQUIRED
+if not exist coopdir.txt goto :REQUIRED
+goto :ORIGIN
 
 :REQUIRED
 echo The Program Requires All Files.
 echo Try Again, Quit?
 choice /C 12 /n /M "Try Again [1] Quit [2]"
 if ERRORLEVEL 2 exit
-if ERRORLEVEL 1 goto setup
-
+if ERRORLEVEL 1 goto :Grabbing
 
 :ORIGIN
-echo Welcome to the launcher.
-echo Before we can launch, have you ran the game with 3DAnalyzer before?
-choice /C YN /n /M "Yes [Y] No [N]"
-if ERRORLEVEL 2 goto INFO
-if ERRORLEVEL 1 goto VPNCHECK
+echo Before COOP is launched, would you like a clean ini files?
+choice /C 123 /n /M "Yes [1], No[2], Info[3]"
+if ERRORLEVEL 3 goto :info
+if ERRORLEVEL 2 goto :VPNCHECK
+if ERRORLEVEL 1 goto :CLEAN
 
 :INFO
-echo You must have ran the game at least once through 3DAnalzyer.
-echo This is to ensure that you have the flashlight fix applied.
-echo Once you have ran the game at least once, using 3DAnalyzer, you may use this launcher.
-echo Press any button to close.
-pause >NUL
-exit
+echo It is advised that both players invovled in COOP have the same ini file.
+echo If both players have varying ini files it can cause disconnects.
+echo The clean INI files are from a fresh install. If both players use them, then they will have the same INI files.
+echo Note: Feel Free to upgrade the graphics, and change the resolution to what you wish from ingame.
+echo Press any key to go back to the choice...
+pause>nul
+Timeout /T 1 /Nobreak >NUL
+goto :ORIGIN
+
+:CLEAN
+set /p coopdir=<coopdir.txt
+set "syslocal=%local%\ChaosTheory\System"
+set "datalocal=%local%\ChaosTheory\ProgramData"
+xcopy /s /y "%syslocal%" "%coopdir%">nul
+xcopy /s /y "%datalocal%" "C:\ProgramData\Ubisoft\Tom Clancy's Splinter Cell Chaos Theory">nul
+echo Files cleaned...
+goto :Custom
+
+:CUSTOM
+echo Want to clean your existing profile as well?
+choice /C 12 /n /M "Yes [1], No[2]"
+if ERRORLEVEL 2 goto :VPNCHECK
+if ERRORLEVEL 1 goto :CustomClean
+
+:CustomClean
+set /p "custom=Type Profile Name Here: "
+set "customdir=C:\ProgramData\Ubisoft\Tom Clancy's Splinter Cell Chaos Theory\Profiles\%custom%"
+if not exist "%customdir%" goto :TryAgain
+set "customdefault=%datalocal%\Profiles\DEFAULT\Default.ini"
+set "customfile=C:\ProgramData\Ubisoft\Tom Clancy's Splinter Cell Chaos Theory\Profiles\%custom%\%custom%.ini"
+xcopy /y "%customdefault%" "%customfile%">nul
+echo Profile "%custom%" cleaned...
+goto :VPNCHECK
+
+:TryAgain
+echo Profile not found... Try Again?
+echo Note: If you choose no, remember that only the default profile will have been cleaned.
+choice /C 12 /n /M "Yes [1], No[2]"
+if ERRORLEVEL 2 goto :VPNCHECK
+if ERRORLEVEL 1 goto :CustomClean
+
 
 :VPNCHECK
 echo Are you using ZeroTier, or Other?
@@ -104,18 +131,8 @@ goto :START
 
 :START
 Timeout /T 5 /Nobreak >NUL
-set /p ThreeDAnalyzer=<3DAnalyze.txt
-set /p FramerApp=<Framer.txt
-set /p thegame=<SCCT_Versus.txt
-
-REM PART 1: Launching Framer and the Game.
-start "" "%FramerApp%"
-REM Launches Framer for optional FPS change.
-echo Enter your desired FPS.
-echo Click here and press any key to proceed.
-pause >NUL
-REM This allows for users to enter their own FPS before proceeding.
-start "" "%ThreeDAnalyzer%" /EXE=%thegame%
+set /p coopgame=<splintercell3.txt
+start "" "%coopgame%" -nointro
 REM The above launches the 3D Analyzer Program & Game
 
 REM Part 2: Setting the Network Adapter
@@ -136,7 +153,7 @@ ECHO Game has launched, monitoring now.
 Timeout /T 15 /Nobreak >NUL
 REM This will monitor the game's activity. If it stops running, then everything is closed.
 :LOOP
-tasklist | find /i "SCCT_Versus" >nul 2>&1
+tasklist | find /i "splintercell3.exe" >nul 2>&1
 IF ERRORLEVEL 1 (
   GOTO QUIT
 ) ELSE (
@@ -146,6 +163,5 @@ IF ERRORLEVEL 1 (
 REM This checks and sees if CT is operating. Slight loop delay added.
 
 :QUIT
-taskkill /F /IM 3DAnalyze.exe >NUL
 start "" "C:\ProgramData\ZeroTier\One\zerotier-one_x64.exe" -q leave %network% >NUL
 exit
