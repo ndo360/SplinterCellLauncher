@@ -6,7 +6,7 @@ REM Command above is to get the current location.
 :check_Permissions
     net session >nul 2>&1
     if %errorLevel% == 0 (
-		goto grabbing
+		goto Grabbing
     ) else (
         echo Insufficient Permissions: You must run this program as administrator.
     )
@@ -17,8 +17,14 @@ REM Command above is to get the current location.
 :Grabbing
 if not exist SCCT_Versus.txt goto :REQUIRED
 if not exist 3DAnalyze.txt goto :REQUIRED
-if not exist Framer.txt goto :REQUIRED
+if not exist Framer.txt goto :doublecheck
 goto :unify
+
+:doublecheck
+set noframer=noframer
+if not exist "%noframer%.txt" goto :REQUIRED
+goto :unify
+
 
 :unify
 echo Connecting to the Unify Network...
@@ -34,7 +40,9 @@ set /p ThreeDAnalyzer=<3DAnalyze.txt
 set /p FramerApp=<Framer.txt
 
 REM PART 1: Launching Framer and the Game.
-start "" "%FramerApp%"
+if not exist "%noframer%.txt" (
+	start "" "%FramerApp%"
+)
 REM This allows for users to enter their own FPS before proceeding.
 start "" "%ThreeDAnalyzer%" /EXE=%thegame%
 REM The above launches the 3D Analyzer Program & Game

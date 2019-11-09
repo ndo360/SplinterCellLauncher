@@ -26,19 +26,40 @@ if not exist 3DAnalyze.txt (
 	set files=3DAnalyze
 	call chooser.bat
 )
+set noframer=noframer
+echo Do you use Framer? If no, it will be skipped. Else it will be added.
+choice /C 12 /n /M "Yes [1] No [2]"
+if ERRORLEVEL 2 goto SkipFramer
+if ERRORLEVEL 1 goto AddFramer
+
+:AddFramer
+if exist noframer.txt del noframer.txt /f /q
 if not exist Framer.txt (
 	set files=Framer
 	call chooser.bat
+	goto verifyfiles
 )
 
+:SkipFramer
+if exist framer.txt del framer.txt
+if not exist %noframer%.txt (
+	echo %noframer%>%noframer%.txt
+	echo Framer Skipped...
+	goto verifyfiles
+)
+:verifyfiles
 if exist "SCCT_Versus.txt" (
     if exist "3DAnalyze.txt" (
 		if exist "Framer.txt" (
 			goto :ORIGIN
-    ) else goto :REQUIRED
+		) else goto :doublecheck
+	) else goto :REQUIRED
 ) else goto :REQUIRED
-)
-else goto :REQUIRED
+
+:doublecheck
+if not exist "%noframer%.txt" goto :REQUIRED
+goto :ORIGIN
+
 
 :REQUIRED
 echo The Program Requires All Files.
@@ -109,11 +130,13 @@ set /p FramerApp=<Framer.txt
 set /p thegame=<SCCT_Versus.txt
 
 REM PART 1: Launching Framer and the Game.
-start "" "%FramerApp%"
-REM Launches Framer for optional FPS change.
-echo Enter your desired FPS.
-echo Click here and press any key to proceed.
-pause >NUL
+if not exist "%noframer%.txt" (
+	start "" "%FramerApp%"
+	REM Launches Framer for optional FPS change.
+	echo Enter your desired FPS.
+	echo Click here and press any key to proceed.
+	pause >NUL
+)
 REM This allows for users to enter their own FPS before proceeding.
 start "" "%ThreeDAnalyzer%" /EXE=%thegame%
 REM The above launches the 3D Analyzer Program & Game
